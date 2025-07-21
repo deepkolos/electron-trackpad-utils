@@ -1,14 +1,19 @@
 {
-	"name": "electron-trackpad-utils",
+	"name": "@deepkolos/electron-trackpad-utils",
 	"version": "1.0.3",
 	"description": "Trigger trackpad haptic feedback and get trackpad scroll began, scroll ended, and force click events in Electron on macOS.",
 	"main": "addon.js",
 	"types": "types.d.ts",
 	"author": "David Cann <david@davidcann.com> (https://davidcann.com)",
+	"maintainers": [
+		{
+			"name": "deepkolos"
+		}
+	],
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/davidcann/electron-trackpad-utils.git"
+		"url": "git+https://github.com/deepkolos/electron-trackpad-utils.git"
 	},
 	"keywords": [
 		"electron",
@@ -19,15 +24,15 @@
 		"mac"
 	],
 	"bugs": {
-		"url": "https://github.com/davidcann/electron-trackpad-utils/issues"
+		"url": "https://github.com/deepkolos/electron-trackpad-utils/issues"
 	},
-	"homepage": "https://github.com/davidcann/electron-trackpad-utils#readme",
+	"homepage": "https://github.com/deepkolos/electron-trackpad-utils#readme",
 	"dependencies": {
 		"bindings": "^1.5.0",
 		"node-addon-api": "^7.0.0"
 	},
 	"scripts": {
-		"preinstall": "python3 -m pip show setuptools || python3 -m pip install --user setuptools",
+		"preinstall": "python3 -m pip show setuptools || brew install python-setuptools",
 		"install": "node-gyp rebuild"
 	},
 	"gypfile": true,

@@ -1,49 +1,46 @@
-# electron-trackpad-utils-zh
+# electron-trackpad-utils
 
-[English](./README.en-US.md)
+> Trigger trackpad haptic feedback and get trackpad scroll began, scroll ended, and force click events in Electron on macOS.
 
+[See demo code](demo)
 
-> 在 Electron on macOS 中触发触控板触觉反馈，并获取触控板滚动开始、滚动结束和强制点击事件。
-
-[查看演示代码](demo)
-
-## 安装
+## Installing
 
     npm install @deepkolos/electron-trackpad-utils
 
 ## API
 
-**onTrackpadScrollBegan(callback)** (仅限 macOS)
+**onTrackpadScrollBegan(callback)** (macOS only)
 
 - `callback` Function
 
-当用户开始在触控板上拖动触摸时触发。
+This fires when the user starts dragging touches on the trackpad.
 
-**onTrackpadScrollEnded(callback)** (仅限 macOS)
+**onTrackpadScrollEnded(callback)** (macOS only)
 
 - `callback` Function
 
-在滚动过程中触摸结束时触发。这可能与发送到浏览器的滚动事件结束的时间不同，例如在惯性滚动的情况下。
+This is triggered when the touches end during scrolling. This may be different from when the scroll events sent to the browser end, in the case of inertial scrolling.
 
-**onTrackpadScroll(callback)** (仅限 macOS)
+**onTrackpadScroll(callback)** (macOS only)
 
 - `callback` Function
   - `deltaX` Float
   - `deltaY` Float
 
-当用户在触控板上滚动时触发。
+This fires when the user scrolls on the trackpad.
 
-**onForceClick(callback)** (仅限 macOS)
+**onForceClick(callback)** (macOS only)
 
 - `callback` Function
 
-**triggerFeedback()** (仅限 macOS)
+**triggerFeedback()** (macOS only)
 
-在 MacBook 的内置触控板或妙控板上触发触觉反馈。例如，在拖动对象时对齐时触发反馈。
+Triggers haptic feedback on the MacBook's built-in trackpad or Magic Trackpad. For example, trigger feedback when snapping to alignment while dragging an object.
 
-## 用法
+## Usage
 
-在主进程中：
+In main process:
 
     const { BrowserWindow } = require("electron");
     const trackpadUtils = require("@deepkolos/electron-trackpad-utils");
@@ -77,9 +74,9 @@
 
     app.whenReady().then(() => createWindow());
 
-## 在 electron-vite 中使用
+## Usage with electron-vite
 
-如果你正在使用 `electron-vite`，你需要将 C/C++ 插件配置为外部模块。
+If you are using `electron-vite`, you need to configure the C/C++ addon as an external module.
 
 ```javascript
 import { defineConfig } from 'electron-vite'
@@ -95,9 +92,9 @@ export default defineConfig({
 })
 ```
 
-## 如何运行演示
+## How to Run Demo
 
-克隆此存储库后，运行：
+After cloning this repository, run:
 
     npm install
     npm rebuild
@@ -105,10 +102,6 @@ export default defineConfig({
     npm install
     npm start
 
-## 许可证
+## License
 
-MIT 许可证
-
-## 原始仓库
-
-[davidcann/electron-trackpad-utils](https://github.com/davidcann/electron-trackpad-utils)
+MIT License

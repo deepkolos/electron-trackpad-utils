@@ -9,6 +9,8 @@ void (*callbackBegan)(Napi::Env env, Napi::Function jsCallback);
 Napi::ThreadSafeFunction tsfnEnded = NULL;
 void (*callbackEnded)(Napi::Env env, Napi::Function jsCallback);
 
+Napi::ThreadSafeFunction tsfnScroll = NULL;
+
 Napi::ThreadSafeFunction tsfnForceClick;
 void (*callbackForceClick)(Napi::Env env, Napi::Function jsCallback);
 
@@ -40,7 +42,19 @@ int lastPressureStage = 0;
 }
 
 - (CGFloat)my_deltaY {
+	CGFloat deltaY = [self my_deltaY];
+
 	if (self.type == NSEventTypeScrollWheel) {
+		CGFloat deltaX = [self deltaX];
+		if (tsfnScroll != NULL && (deltaX != 0 || deltaY != 0)) {
+			tsfnScroll.BlockingCall([=](Napi::Env env, Napi::Function jsCallback) {
+			  Napi::Object obj = Napi::Object::New(env);
+			  obj.Set("deltaX", Napi::Number::New(env, deltaX));
+			  obj.Set("deltaY", Napi::Number::New(env, deltaY));
+			  jsCallback.Call({obj});
+			});
+		}
+
 		if ([self phase] == NSEventPhaseBegan) {
 			if (lastBeganDate == nil || [lastBeganDate timeIntervalSinceNow] < -0.002) {
 				if (tsfnBegan != NULL) {
@@ -59,7 +73,7 @@ int lastPressureStage = 0;
 			began = false;
 		}
 	}
-	return [self my_deltaY];
+	return deltaY;
 }
 
 @end
@@ -108,6 +122,15 @@ void setupEnded(const Napi::CallbackInfo &info) {
 	callbackEnded = [](Napi::Env env, Napi::Function jsCallback) { jsCallback.Call({}); };
 }
 
+void setupScroll(const Napi::CallbackInfo &info) {
+	Napi::Env env = info.Env();
+	if (info.Length() > 0 && info[0].IsFunction()) {
+		tsfnScroll = Napi::ThreadSafeFunction::New(env, info[0].As<Napi::Function>(), "Scroll", 0, 1);
+	} else {
+		tsfnScroll = NULL;
+	}
+}
+
 void setupForceClick(const Napi::CallbackInfo &info) {
 	Napi::Env env = info.Env();
 	if (info.Length() > 0 && info[0].IsFunction()) {
@@ -127,6 +150,7 @@ void triggerFeedback(const Napi::CallbackInfo &info) {
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
 	exports.Set(Napi::String::New(env, "onTrackpadScrollBegan"), Napi::Function::New(env, setupBegan));
 	exports.Set(Napi::String::New(env, "onTrackpadScrollEnded"), Napi::Function::New(env, setupEnded));
+	exports.Set(Napi::String::New(env, "onTrackpadScroll"), Napi::Function::New(env, setupScroll));
 	exports.Set(Napi::String::New(env, "onForceClick"), Napi::Function::New(env, setupForceClick));
 	exports.Set(Napi::String::New(env, "triggerFeedback"), Napi::Function::New(env, triggerFeedback));
 	return exports;
