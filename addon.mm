@@ -43,14 +43,30 @@ int lastPressureStage = 0;
 
 - (CGFloat)my_deltaY {
 	CGFloat deltaY = [self my_deltaY];
+	CGFloat deltaX = [self deltaX];
 
 	if (self.type == NSEventTypeScrollWheel) {
-		CGFloat deltaX = [self deltaX];
+		NSString *deviceName = @"unknown";
+		if ([self subtype] == NSEventSubtypeMouseEvent) {
+				deviceName = @"mouse";
+		} else if ([self subtype] == NSEventSubtypeTouch) {
+			deviceName = @"touch";
+		} else if ([self subtype] == NSEventSubtypeTabletPoint) {
+			deviceName = @"tablet";
+		} else if ([self subtype] == NSEventSubtypeTabletProximity) {
+			deviceName = @"tabletProximity";
+		}
+
 		if (tsfnScroll != NULL && (deltaX != 0 || deltaY != 0)) {
 			tsfnScroll.BlockingCall([=](Napi::Env env, Napi::Function jsCallback) {
 			  Napi::Object obj = Napi::Object::New(env);
 			  obj.Set("deltaX", Napi::Number::New(env, deltaX));
 			  obj.Set("deltaY", Napi::Number::New(env, deltaY));
+			  if (deviceName) {
+					obj.Set("deviceName", Napi::String::New(env, [deviceName UTF8String]));
+			  } else {
+					obj.Set("deviceName", env.Null());
+			  }
 			  jsCallback.Call({obj});
 			});
 		}
