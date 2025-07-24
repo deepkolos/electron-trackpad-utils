@@ -30,6 +30,7 @@
 - `callback` Function
   - `deltaX` Float
   - `deltaY` Float
+  - `isTrackpad` Boolean
 
 当用户在触控板上滚动时触发。
 

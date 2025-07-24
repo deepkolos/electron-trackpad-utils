@@ -42,31 +42,31 @@ int lastPressureStage = 0;
 }
 
 - (CGFloat)my_deltaY {
-	CGFloat deltaY = [self my_deltaY];
-	CGFloat deltaX = [self deltaX];
+	CGFloat deltaY_original = [self my_deltaY];
 
 	if (self.type == NSEventTypeScrollWheel) {
-		NSString *deviceName = @"unknown";
-		if ([self subtype] == NSEventSubtypeMouseEvent) {
-				deviceName = @"mouse";
-		} else if ([self subtype] == NSEventSubtypeTouch) {
-			deviceName = @"touch";
-		} else if ([self subtype] == NSEventSubtypeTabletPoint) {
-			deviceName = @"tablet";
-		} else if ([self subtype] == NSEventSubtypeTabletProximity) {
-			deviceName = @"tabletProximity";
+		CGFloat deltaX;
+		CGFloat deltaY;
+
+		if ([self hasPreciseScrollingDeltas]) {
+			deltaX = [self scrollingDeltaX];
+			deltaY = [self scrollingDeltaY];
+		} else {
+			deltaX = [self deltaX] * 10;
+			deltaY = deltaY_original * 10;
 		}
 
-		if (tsfnScroll != NULL && (deltaX != 0 || deltaY != 0)) {
+		int intDeltaX = round(deltaX);
+		int intDeltaY = round(deltaY);
+
+		BOOL isTrackpad = [self phase] != NSEventPhaseNone || [self momentumPhase] != NSEventPhaseNone;
+
+		if (tsfnScroll != NULL && (intDeltaX != 0 || intDeltaY != 0)) {
 			tsfnScroll.BlockingCall([=](Napi::Env env, Napi::Function jsCallback) {
 			  Napi::Object obj = Napi::Object::New(env);
-			  obj.Set("deltaX", Napi::Number::New(env, deltaX));
-			  obj.Set("deltaY", Napi::Number::New(env, deltaY));
-			  if (deviceName) {
-					obj.Set("deviceName", Napi::String::New(env, [deviceName UTF8String]));
-			  } else {
-					obj.Set("deviceName", env.Null());
-			  }
+			  obj.Set("deltaX", Napi::Number::New(env, intDeltaX));
+			  obj.Set("deltaY", Napi::Number::New(env, intDeltaY));
+			  obj.Set("isTrackpad", Napi::Boolean::New(env, isTrackpad));
 			  jsCallback.Call({obj});
 			});
 		}
@@ -89,7 +89,7 @@ int lastPressureStage = 0;
 			began = false;
 		}
 	}
-	return deltaY;
+	return deltaY_original;
 }
 
 @end

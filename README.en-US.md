@@ -27,6 +27,7 @@ This is triggered when the touches end during scrolling. This may be different f
 - `callback` Function
   - `deltaX` Float
   - `deltaY` Float
+  - `isTrackpad` Boolean
 
 This fires when the user scrolls on the trackpad.
 
