@@ -3,10 +3,19 @@ function triggerFeedback() {
 }
 
 window.electronAPI.receive("fromMain", (data) => {
-	const log = document.getElementById("log");
-	if (data.command === "onScroll") {
-		log.innerText = `${data.command}: deltaX: ${data.event.deltaX.toFixed(3)}, deltaY: ${data.event.deltaY.toFixed(3)} isTrackpad: ${data.event.isTrackpad} \n` + log.innerText;
+	const logEle = document.getElementById("log");
+	if (data.command === "onGesture") {
+		const event = data.event;
+		let log = "";
+		if (event.isScroll) {
+			log = `${data.command}: deltaX: ${event.deltaX.toFixed(3)}, deltaY: ${event.deltaY.toFixed(3)}, isTrackpad: ${event.isTrackpad}`;
+		} else if (event.isScale) {
+			log = `${data.command}: magnification: ${event.magnification.toFixed(3)}`;
+		} else if (event.isRotate) {
+			log = `${data.command}: rotation: ${event.deltaAngle.toFixed(3)}`;
+		}
+		logEle.innerText = log + "\n" + logEle.innerText;
 	} else {
-		log.innerText = data.command + "\n" + log.innerText;
+		logEle.innerText = data.command + "\n" + logEle.innerText;
 	}
 });

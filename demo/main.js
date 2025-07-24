@@ -11,8 +11,8 @@ trackpadUtils.onTrackpadScrollEnded(() => {
 	mainWindow.webContents.send("fromMain", { command: "onTrackpadScrollEnded" });
 });
 
-trackpadUtils.onScroll((event) => {
-	mainWindow.webContents.send("fromMain", { command: "onScroll", event });
+trackpadUtils.onGesture((event) => {
+	mainWindow.webContents.send("fromMain", { command: "onGesture", event });
 });
 
 

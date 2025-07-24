@@ -9,7 +9,7 @@ void (*callbackBegan)(Napi::Env env, Napi::Function jsCallback);
 Napi::ThreadSafeFunction tsfnEnded = NULL;
 void (*callbackEnded)(Napi::Env env, Napi::Function jsCallback);
 
-Napi::ThreadSafeFunction tsfnScroll = NULL;
+Napi::ThreadSafeFunction tsfnGesture = NULL;
 
 Napi::ThreadSafeFunction tsfnForceClick;
 void (*callbackForceClick)(Napi::Env env, Napi::Function jsCallback);
@@ -59,15 +59,19 @@ int lastPressureStage = 0;
 		int intDeltaX = round(deltaX);
 		int intDeltaY = round(deltaY);
 
-		// Reference: godot_content_view.mm:903
 		BOOL isTrackpad = [self phase] != NSEventPhaseNone || [self momentumPhase] != NSEventPhaseNone;
 
-		if (tsfnScroll != NULL && (intDeltaX != 0 || intDeltaY != 0)) {
-			tsfnScroll.BlockingCall([=](Napi::Env env, Napi::Function jsCallback) {
+		if (tsfnGesture != NULL && (intDeltaX != 0 || intDeltaY != 0)) {
+			tsfnGesture.BlockingCall([=](Napi::Env env, Napi::Function jsCallback) {
 			  Napi::Object obj = Napi::Object::New(env);
 			  obj.Set("deltaX", Napi::Number::New(env, intDeltaX));
 			  obj.Set("deltaY", Napi::Number::New(env, intDeltaY));
 			  obj.Set("isTrackpad", Napi::Boolean::New(env, isTrackpad));
+			  obj.Set("isScale", Napi::Boolean::New(env, false));
+			  obj.Set("isScroll", Napi::Boolean::New(env, true));
+			  obj.Set("isRotate", Napi::Boolean::New(env, false));
+			  obj.Set("magnification", Napi::Number::New(env, 0));
+			  obj.Set("deltaAngle", Napi::Number::New(env, 0));
 			  jsCallback.Call({obj});
 			});
 		}
@@ -116,6 +120,39 @@ int lastPressureStage = 0;
 }
 
 - (void)my_sendEvent:(NSEvent *)event {
+	if (event.type == NSEventTypeMagnify) {
+		if (tsfnGesture != NULL) {
+			CGFloat magnification = [event magnification];
+			tsfnGesture.BlockingCall([=](Napi::Env env, Napi::Function jsCallback) {
+			  Napi::Object obj = Napi::Object::New(env);
+			  obj.Set("deltaX", Napi::Number::New(env, 0));
+			  obj.Set("deltaY", Napi::Number::New(env, 0));
+			  obj.Set("isTrackpad", Napi::Boolean::New(env, true));
+			  obj.Set("isScale", Napi::Boolean::New(env, true));
+			  obj.Set("isScroll", Napi::Boolean::New(env, false));
+			  obj.Set("isRotate", Napi::Boolean::New(env, false));
+			  obj.Set("magnification", Napi::Number::New(env, magnification));
+			  obj.Set("deltaAngle", Napi::Number::New(env, 0));
+			  jsCallback.Call({obj});
+			});
+		}
+	} else if (event.type == NSEventTypeRotate) {
+		if (tsfnGesture != NULL) {
+			CGFloat rotation = [event rotation];
+			tsfnGesture.BlockingCall([=](Napi::Env env, Napi::Function jsCallback) {
+			  Napi::Object obj = Napi::Object::New(env);
+			  obj.Set("deltaX", Napi::Number::New(env, 0));
+			  obj.Set("deltaY", Napi::Number::New(env, 0));
+			  obj.Set("isTrackpad", Napi::Boolean::New(env, true));
+			  obj.Set("isScale", Napi::Boolean::New(env, false));
+			  obj.Set("isScroll", Napi::Boolean::New(env, false));
+			  obj.Set("isRotate", Napi::Boolean::New(env, true));
+			  obj.Set("magnification", Napi::Number::New(env, 0));
+			  obj.Set("deltaAngle", Napi::Number::New(env, rotation));
+			  jsCallback.Call({obj});
+			});
+		}
+	}
 	if (event.type == NSEventTypePressure && event.pressureBehavior == NSPressureBehaviorPrimaryDeepClick) {
 		if (lastPressureStage == 1 && event.stage == 2 && tsfnForceClick != NULL && callbackForceClick != NULL) {
 			tsfnForceClick.BlockingCall(callbackForceClick);
@@ -139,12 +176,12 @@ void setupEnded(const Napi::CallbackInfo &info) {
 	callbackEnded = [](Napi::Env env, Napi::Function jsCallback) { jsCallback.Call({}); };
 }
 
-void setupScroll(const Napi::CallbackInfo &info) {
+void setupGesture(const Napi::CallbackInfo &info) {
 	Napi::Env env = info.Env();
 	if (info.Length() > 0 && info[0].IsFunction()) {
-		tsfnScroll = Napi::ThreadSafeFunction::New(env, info[0].As<Napi::Function>(), "Scroll", 0, 1);
+		tsfnGesture = Napi::ThreadSafeFunction::New(env, info[0].As<Napi::Function>(), "Gesture", 0, 1);
 	} else {
-		tsfnScroll = NULL;
+		tsfnGesture = NULL;
 	}
 }
 
@@ -167,7 +204,7 @@ void triggerFeedback(const Napi::CallbackInfo &info) {
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
 	exports.Set(Napi::String::New(env, "onTrackpadScrollBegan"), Napi::Function::New(env, setupBegan));
 	exports.Set(Napi::String::New(env, "onTrackpadScrollEnded"), Napi::Function::New(env, setupEnded));
-	exports.Set(Napi::String::New(env, "onScroll"), Napi::Function::New(env, setupScroll));
+	exports.Set(Napi::String::New(env, "onGesture"), Napi::Function::New(env, setupGesture));
 	exports.Set(Napi::String::New(env, "onForceClick"), Napi::Function::New(env, setupForceClick));
 	exports.Set(Napi::String::New(env, "triggerFeedback"), Napi::Function::New(env, triggerFeedback));
 	return exports;
