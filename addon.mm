@@ -59,6 +59,7 @@ int lastPressureStage = 0;
 		int intDeltaX = round(deltaX);
 		int intDeltaY = round(deltaY);
 
+		// Reference: godot_content_view.mm:903
 		BOOL isTrackpad = [self phase] != NSEventPhaseNone || [self momentumPhase] != NSEventPhaseNone;
 
 		if (tsfnScroll != NULL && (intDeltaX != 0 || intDeltaY != 0)) {
@@ -166,7 +167,7 @@ void triggerFeedback(const Napi::CallbackInfo &info) {
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
 	exports.Set(Napi::String::New(env, "onTrackpadScrollBegan"), Napi::Function::New(env, setupBegan));
 	exports.Set(Napi::String::New(env, "onTrackpadScrollEnded"), Napi::Function::New(env, setupEnded));
-	exports.Set(Napi::String::New(env, "onTrackpadScroll"), Napi::Function::New(env, setupScroll));
+	exports.Set(Napi::String::New(env, "onScroll"), Napi::Function::New(env, setupScroll));
 	exports.Set(Napi::String::New(env, "onForceClick"), Napi::Function::New(env, setupForceClick));
 	exports.Set(Napi::String::New(env, "triggerFeedback"), Napi::Function::New(env, triggerFeedback));
 	return exports;

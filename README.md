@@ -25,14 +25,14 @@
 
 在滚动过程中触摸结束时触发。这可能与发送到浏览器的滚动事件结束的时间不同，例如在惯性滚动的情况下。
 
-**onTrackpadScroll(callback)** (仅限 macOS)
+**onScroll(callback)** (仅限 macOS)
 
 - `callback` Function
   - `deltaX` Float
   - `deltaY` Float
   - `isTrackpad` Boolean
 
-当用户在触控板上滚动时触发。
+当用户滚动时触发。
 
 **onForceClick(callback)** (仅限 macOS)
 
@@ -57,8 +57,8 @@
     	console.log("onTrackpadScrollEnded");
     });
 
-    trackpadUtils.onTrackpadScroll(({ deltaX, deltaY }) => {
-      console.log('onTrackpadScroll', { deltaX, deltaY });
+    trackpadUtils.onScroll(({ deltaX, deltaY, isTrackpad }) => {
+      console.log('onScroll', { deltaX, deltaY, isTrackpad });
     });
 
     trackpadUtils.onForceClick(() => {

@@ -22,14 +22,14 @@ This fires when the user starts dragging touches on the trackpad.
 
 This is triggered when the touches end during scrolling. This may be different from when the scroll events sent to the browser end, in the case of inertial scrolling.
 
-**onTrackpadScroll(callback)** (macOS only)
+**onScroll(callback)** (macOS only)
 
 - `callback` Function
   - `deltaX` Float
   - `deltaY` Float
   - `isTrackpad` Boolean
 
-This fires when the user scrolls on the trackpad.
+This fires when the user scrolls.
 
 **onForceClick(callback)** (macOS only)
 
@@ -54,8 +54,8 @@ In main process:
     	console.log("onTrackpadScrollEnded");
     });
 
-    trackpadUtils.onTrackpadScroll(({ deltaX, deltaY }) => {
-      console.log('onTrackpadScroll', { deltaX, deltaY });
+    trackpadUtils.onScroll(({ deltaX, deltaY, isTrackpad }) => {
+      console.log('onScroll', { deltaX, deltaY, isTrackpad });
     });
 
     trackpadUtils.onForceClick(() => {
